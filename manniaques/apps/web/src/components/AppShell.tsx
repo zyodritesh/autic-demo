@@ -43,7 +43,7 @@ export function AppShell({
       <aside className="desk-sidebar no-print">
         <div className="desk-brand">
           <div className="brand">Manniaques</div>
-          <div className="muted desk-erp-tag">ERP · {session?.factoryName}</div>
+          <div className="desk-erp-tag">ERP workspace · {session?.factoryName}</div>
         </div>
 
         <nav className="desk-nav" aria-label="ERP modules">

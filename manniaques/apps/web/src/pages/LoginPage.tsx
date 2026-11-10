@@ -32,7 +32,7 @@ export function LoginPage() {
     <div className="login-page">
       <form className="login-card" onSubmit={(e) => onSubmit(e)}>
         <h1>Manniaques</h1>
-        <p className="muted">Wholesale sales · sign in once, sell offline.</p>
+        <p className="muted">Wholesale garment ERP · staff login</p>
         {error ? <div className="banner error">{error}</div> : null}
         <div className="field">
           <label htmlFor="mobile">Mobile</label>

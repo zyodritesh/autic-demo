@@ -139,13 +139,14 @@ export function HomePage() {
         </div>
       ) : null}
 
-      <h2 className="section-title">Modules</h2>
+      <h2 className="section-title">ERP modules</h2>
       <p className="muted" style={{ marginTop: -8, marginBottom: 14 }}>
-        Open one module at a time — Masters, Sales, Purchase, Production, Accounts, Reports.
+        Ek module kholo — Masters se Admin tak, screen by screen.
       </p>
       <div className="module-launcher">
-        {modules.map((mod) => (
+        {modules.map((mod, i) => (
           <Link key={mod.id} className="module-launcher-row" to={mod.hub}>
+            <span className="module-index">{String(i + 1).padStart(2, '0')}</span>
             <div>
               <strong>{mod.label}</strong>
               <span className="muted">{mod.hint}</span>

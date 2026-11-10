@@ -18,12 +18,13 @@ export function ModuleHubPage() {
   return (
     <AppShell title={mod.label} wide>
       <ModuleBar moduleId={mod.id} access={access} />
-      <p className="muted module-hub-lead">{mod.hint}. Open one screen below.</p>
+      <p className="muted module-hub-lead">{mod.hint}. Neeche se screen choose karo.</p>
       <div className="module-menu">
         {mod.items
           .filter((item) => access[item.key as keyof typeof access])
-          .map((item) => (
+          .map((item, i) => (
             <Link key={`${item.to}-${item.label}`} className="module-menu-row" to={item.to}>
+              <span className="module-index">{String(i + 1).padStart(2, '0')}</span>
               <div>
                 <strong>{item.label}</strong>
                 {item.hint ? <span className="muted">{item.hint}</span> : null}
