@@ -1,0 +1,31 @@
+{
+  "name": "manniaques",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "build": "npm run build -w apps/api && npm run build -w apps/web && node scripts/migrate.mjs",
+    "seed": "npm run seed -w apps/api",
+    "db:migrate": "npm run db:migrate -w apps/api",
+    "start": "npm run start -w apps/api",
+    "migrate": "node scripts/migrate.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.13.3"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+
+  "overrides": {
+    "rollup": "4.68.1"
+  }
+}
+
