@@ -51,16 +51,26 @@ app.use(
     res: express.Response,
     _next: express.NextFunction,
   ) => {
+    const msg = err.message || '';
+    if (
+      msg.includes('Only JPEG') ||
+      msg.includes('File too large') ||
+      (err as { code?: string }).code === 'LIMIT_FILE_SIZE'
+    ) {
+      return res.status(400).json({ error: msg || 'Invalid upload' });
+    }
     console.error(err);
     res.status(500).json({ error: 'Server error', detail: err.message });
   },
 );
 
 async function main() {
-  try {
-    await seedIfEmpty();
-  } catch (err) {
-    console.error('Startup seed skipped/failed:', err);
+  if (config.allowDemoSeed) {
+    try {
+      await seedIfEmpty();
+    } catch (err) {
+      console.error('Startup seed skipped/failed:', err);
+    }
   }
   app.listen(config.port, '0.0.0.0', () => {
     console.log(`Manniaques API on http://127.0.0.1:${config.port}`);

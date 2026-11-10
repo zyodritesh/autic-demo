@@ -4,8 +4,8 @@ import { useAuth } from '../state/auth';
 
 export function LoginPage() {
   const { session, login } = useAuth();
-  const [mobile, setMobile] = useState('9000000001');
-  const [pin, setPin] = useState('1234');
+  const [mobile, setMobile] = useState('');
+  const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [factories, setFactories] = useState<Array<{ id: string; name: string }> | null>(null);

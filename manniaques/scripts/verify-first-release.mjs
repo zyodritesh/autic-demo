@@ -31,10 +31,16 @@ function assert(cond, msg) {
   if (!cond) throw new Error(msg);
 }
 
+const DEMO_PIN = process.env.DEMO_PIN?.trim();
+if (!DEMO_PIN) {
+  console.error('Set DEMO_PIN to the PIN printed by SEED_DEMO=1 npm run seed');
+  process.exit(1);
+}
+
 async function login(mobile) {
   const { status, json } = await req('/api/auth/login', {
     method: 'POST',
-    body: { mobile, pin: '1234' },
+    body: { mobile, pin: DEMO_PIN },
   });
   assert(status === 200 && json.token, `login failed for ${mobile}: ${JSON.stringify(json)}`);
   return json;

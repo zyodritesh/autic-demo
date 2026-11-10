@@ -15,8 +15,14 @@ async function req(path, { method = 'GET', token, body } = {}) {
   return json;
 }
 
+const DEMO_PIN = process.env.DEMO_PIN?.trim();
+if (!DEMO_PIN) {
+  console.error('Set DEMO_PIN to the PIN printed by SEED_DEMO=1 npm run seed');
+  process.exit(1);
+}
+
 async function login(mobile) {
-  return req('/api/auth/login', { method: 'POST', body: { mobile, pin: '1234' } });
+  return req('/api/auth/login', { method: 'POST', body: { mobile, pin: DEMO_PIN } });
 }
 
 const results = [];

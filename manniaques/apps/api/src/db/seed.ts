@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { randomInt } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +8,14 @@ import { config } from '../config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+function assertDemoSeedAllowed() {
+  if (process.env.SEED_DEMO !== '1') {
+    throw new Error(
+      'Demo seed is disabled. Set SEED_DEMO=1 for local demo data only (never on hosted publish).',
+    );
+  }
+}
+
 function svgThumb(label: string, colour: string) {
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="400">
   <rect width="320" height="400" fill="${colour}"/>
@@ -14,7 +23,13 @@ function svgThumb(label: string, colour: string) {
 </svg>`);
 }
 
+/** Strong random 8-digit PIN — printed to stdout only, never hardcoded. */
+function generateDemoPin(): string {
+  return String(randomInt(10000000, 100000000));
+}
+
 export async function seed({ truncate = true }: { truncate?: boolean } = {}) {
+  assertDemoSeedAllowed();
   fs.mkdirSync(config.uploadsDir, { recursive: true });
   if (truncate) {
     await query(`
@@ -37,7 +52,8 @@ export async function seed({ truncate = true }: { truncate?: boolean } = {}) {
      RETURNING id, name`,
   );
   const [manniaques, aurora] = factories.rows;
-  const pinHash = await bcrypt.hash('1234', 8);
+  const demoPin = generateDemoPin();
+  const pinHash = await bcrypt.hash(demoPin, 8);
 
   const users = await query<{ id: string; mobile: string; name: string }>(
     `INSERT INTO users (mobile, name, pin_hash) VALUES
@@ -263,18 +279,18 @@ export async function seed({ truncate = true }: { truncate?: boolean } = {}) {
       {
         factories: factories.rows,
         logins: [
-          { mobile: '9000000001', pin: '1234', roles: 'sales', factory: 'Manniaques' },
-          { mobile: '9000000002', pin: '1234', roles: 'factory_admin', factory: 'Manniaques' },
-          { mobile: '9000000003', pin: '1234', roles: 'sales', factory: 'Aurora Knits' },
-          { mobile: '9000000004', pin: '1234', roles: 'purchase', factory: 'Manniaques' },
-          { mobile: '9000000005', pin: '1234', roles: 'production', factory: 'Manniaques' },
-          { mobile: '9000000006', pin: '1234', roles: 'stores+sales', factory: 'Manniaques' },
-          { mobile: '9000000007', pin: '1234', roles: 'accounts', factory: 'Manniaques' },
-          { mobile: '9000000008', pin: '1234', roles: 'agent', factory: 'Manniaques' },
-          { mobile: '9000000009', pin: '1234', roles: 'super_admin', factory: 'Manniaques' },
+          { mobile: '9000000001', pin: demoPin, roles: 'sales', factory: 'Manniaques' },
+          { mobile: '9000000002', pin: demoPin, roles: 'factory_admin', factory: 'Manniaques' },
+          { mobile: '9000000003', pin: demoPin, roles: 'sales', factory: 'Aurora Knits' },
+          { mobile: '9000000004', pin: demoPin, roles: 'purchase', factory: 'Manniaques' },
+          { mobile: '9000000005', pin: demoPin, roles: 'production', factory: 'Manniaques' },
+          { mobile: '9000000006', pin: demoPin, roles: 'stores+sales', factory: 'Manniaques' },
+          { mobile: '9000000007', pin: demoPin, roles: 'accounts', factory: 'Manniaques' },
+          { mobile: '9000000008', pin: demoPin, roles: 'agent', factory: 'Manniaques' },
+          { mobile: '9000000009', pin: demoPin, roles: 'super_admin', factory: 'Manniaques' },
         ],
         customers: customers.rows.length,
-        note: 'MNQ-401 BOM: 2.5m fabric @100 + stitch80 + finish20 + pack10 = ₹360/pc',
+        note: 'Demo PINs are random and printed here only. MNQ-401 BOM ≈ ₹360/pc.',
       },
       null,
       2,
@@ -283,10 +299,11 @@ export async function seed({ truncate = true }: { truncate?: boolean } = {}) {
 }
 
 export async function seedIfEmpty() {
+  assertDemoSeedAllowed();
   const { rows } = await query<{ n: string }>('SELECT count(*)::text AS n FROM users');
   if (Number(rows[0]?.n || 0) > 0) return false;
   await seed({ truncate: false });
-  console.log('Demo seed applied (empty database)');
+  console.log('Demo seed applied (empty database, SEED_DEMO=1)');
   return true;
 }
 

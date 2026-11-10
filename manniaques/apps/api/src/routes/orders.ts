@@ -16,15 +16,36 @@ ordersRouter.use(requireAuth);
 
 fs.mkdirSync(config.uploadsDir, { recursive: true });
 
+const ALLOWED_UPLOAD_MIME = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+]);
+
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+};
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, config.uploadsDir),
     filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname) || '.jpg';
+      const ext = MIME_TO_EXT[file.mimetype] || '.bin';
       cb(null, `${randomUUID()}${ext}`);
     },
   }),
-  limits: { fileSize: 8 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!ALLOWED_UPLOAD_MIME.has(file.mimetype)) {
+      cb(new Error('Only JPEG, PNG, WebP, or GIF images are allowed'));
+      return;
+    }
+    cb(null, true);
+  },
 });
 
 type IncomingLine = {

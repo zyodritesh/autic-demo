@@ -12,7 +12,7 @@
     "dev:api": "npm run dev -w apps/api",
     "dev:web": "npm run dev -w apps/web",
     "build": "npm run build -w apps/api && npm run build -w apps/web && node scripts/migrate.mjs",
-    "seed": "npm run seed -w apps/api",
+    "seed": "SEED_DEMO=1 npm run seed -w apps/api",
     "db:migrate": "npm run db:migrate -w apps/api",
     "start": "npm run start -w apps/api",
     "migrate": "node scripts/migrate.mjs"
