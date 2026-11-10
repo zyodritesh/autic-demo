@@ -15,6 +15,7 @@ import { AgentsPage } from './pages/AgentsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { TeamPage } from './pages/TeamPage';
 import { FactoriesPage } from './pages/FactoriesPage';
+import { ModuleHubPage } from './pages/ModuleHubPage';
 import { useEffect } from 'react';
 import { syncPending } from './lib/sync';
 
@@ -40,6 +41,7 @@ export function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<Protected><HomePage /></Protected>} />
+      <Route path="/module/:moduleId" element={<Protected><ModuleHubPage /></Protected>} />
       <Route path="/sale/:orderId?" element={<Protected><SalePage /></Protected>} />
       <Route path="/order/:orderId" element={<Protected><OrderPage /></Protected>} />
       <Route path="/items" element={<Protected><ItemsPage /></Protected>} />

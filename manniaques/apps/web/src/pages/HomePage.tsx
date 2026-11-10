@@ -6,7 +6,7 @@ import { getDb } from '../db/local';
 import { inr, offlineOrderRef, uuid } from '../lib/ids';
 import { syncPending } from '../lib/sync';
 import { api } from '../lib/api';
-import { accessFromRoles } from '../lib/modules';
+import { accessFromRoles, modulesForAccess } from '../lib/modules';
 import { AppShell } from '../components/AppShell';
 
 type HomeData = {
@@ -25,6 +25,7 @@ export function HomePage() {
   const [syncMsg, setSyncMsg] = useState('');
   const [home, setHome] = useState<HomeData | null>(null);
   const access = accessFromRoles(session?.roles || [session?.role || 'sales']);
+  const modules = modulesForAccess(access);
 
   const drafts = useLiveQuery(async () => {
     if (!session) return [];
@@ -82,7 +83,7 @@ export function HomePage() {
       : access.purchase
         ? { label: 'New purchase', onClick: () => navigate('/purchase/new') }
         : access.production
-          ? { label: 'Job work', onClick: () => navigate('/jobwork') }
+          ? { label: 'Open job work', onClick: () => navigate('/jobwork') }
           : access.accounts
             ? { label: 'Receive or pay', onClick: () => navigate('/payments') }
             : access.team
@@ -92,7 +93,7 @@ export function HomePage() {
                 : { label: 'Open stock', onClick: () => navigate('/stock') };
 
   return (
-    <AppShell title="Home">
+    <AppShell title="ERP Home" wide>
       <div className="hero-action no-print">
         <button type="button" className="btn btn-primary" style={{ fontSize: '1.15rem' }} onClick={primary.onClick}>
           {primary.label}
@@ -117,94 +118,48 @@ export function HomePage() {
       </div>
 
       {home ? (
-        <div className="stats-row">
-          <div className="stat-card">
-            <div className="muted">Today sales</div>
+        <div className="erp-kpi-row" aria-label="Today">
+          <div>
+            <span className="muted">Today sales</span>
             <strong>{inr(Number(home.todaySales.amount))}</strong>
-            <div className="muted">{home.todaySales.cnt} orders</div>
+            <span className="muted">{home.todaySales.cnt} orders</span>
           </div>
-          <div className="stat-card">
-            <div className="muted">PO drafts</div>
+          <div>
+            <span className="muted">PO drafts</span>
             <strong>{home.pendingPurchaseDrafts}</strong>
           </div>
-          <div className="stat-card">
-            <div className="muted">Open job work</div>
+          <div>
+            <span className="muted">Open job work</span>
             <strong>{home.openJobWork}</strong>
           </div>
-          <div className="stat-card">
-            <div className="muted">Waiting sync</div>
+          <div>
+            <span className="muted">Waiting sync</span>
             <strong>{home.waitingSync}</strong>
-            <div className="muted">{home.openFollowUps} follow-ups</div>
           </div>
         </div>
       ) : null}
 
-      <div className="shortcut-grid no-print">
-        {access.sales ? (
-          <Link className="shortcut" to="/sale">
-            <strong>Sales</strong>
-            <span className="muted">Orders & showrooms</span>
+      <h2 className="section-title">Modules</h2>
+      <p className="muted" style={{ marginTop: -8, marginBottom: 14 }}>
+        Open one module at a time — Masters, Sales, Purchase, Production, Accounts, Reports.
+      </p>
+      <div className="module-launcher">
+        {modules.map((mod) => (
+          <Link key={mod.id} className="module-launcher-row" to={mod.hub}>
+            <div>
+              <strong>{mod.label}</strong>
+              <span className="muted">{mod.hint}</span>
+            </div>
+            <span className="module-menu-go" aria-hidden>
+              →
+            </span>
           </Link>
-        ) : null}
-        {access.purchase ? (
-          <Link className="shortcut" to="/purchase">
-            <strong>Purchase</strong>
-            <span className="muted">PO · receive · pay</span>
-          </Link>
-        ) : null}
-        {access.production ? (
-          <Link className="shortcut" to="/jobwork">
-            <strong>Job work</strong>
-            <span className="muted">Issue · receive</span>
-          </Link>
-        ) : null}
-        {access.items ? (
-          <Link className="shortcut" to="/items">
-            <strong>Items</strong>
-            <span className="muted">Raw & finished</span>
-          </Link>
-        ) : null}
-        {access.catalogue ? (
-          <Link className="shortcut" to="/catalogue">
-            <strong>Catalogue</strong>
-            <span className="muted">Styles · packs · BOM</span>
-          </Link>
-        ) : null}
-        {access.parties ? (
-          <Link className="shortcut" to="/parties">
-            <strong>Parties</strong>
-            <span className="muted">Customers · vendors</span>
-          </Link>
-        ) : null}
-        {access.stores ? (
-          <Link className="shortcut" to="/stock">
-            <strong>Stock</strong>
-            <span className="muted">Raw · finished · dispatch</span>
-          </Link>
-        ) : null}
-        {access.accounts || access.reports ? (
-          <Link className="shortcut" to="/reports">
-            <strong>Reports</strong>
-            <span className="muted">Sales · P&L · stock</span>
-          </Link>
-        ) : null}
-        {access.agent ? (
-          <Link className="shortcut" to="/agents">
-            <strong>Agents</strong>
-            <span className="muted">Commission</span>
-          </Link>
-        ) : null}
-        {access.team ? (
-          <Link className="shortcut" to="/team">
-            <strong>Team</strong>
-            <span className="muted">Invite staff</span>
-          </Link>
-        ) : null}
+        ))}
       </div>
 
       {access.sales ? (
         <>
-          <h2 className="section-title">Recent drafts</h2>
+          <h2 className="section-title">Recent sales drafts</h2>
           <div className="list">
             {(drafts || []).length === 0 ? (
               <div className="muted">No drafts yet.</div>
